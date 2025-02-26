@@ -15,11 +15,10 @@
             background-color: #121212;
             color: #fff;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             flex-direction: column;
+            align-items: center;
             text-align: center;
+            padding: 20px;
         }
         .container {
             max-width: 400px;
@@ -28,6 +27,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
         }
         .profile-pic {
             width: 100px;
@@ -49,7 +49,7 @@
         .button {
             display: block;
             width: 100%;
-            background: #ff9800;
+            background: #007BFF; /* Blue color */
             color: white;
             text-align: center;
             padding: 12px;
@@ -61,12 +61,102 @@
             transition: 0.3s;
         }
         .button:hover {
-            background: #ffb74d;
+            background: #0056b3;
+        }
+        /* YouTube Swiper */
+        .video-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            max-width: 100%;
+            margin-top: 20px;
+            overflow: hidden; /* Hide overflow to prevent scrollbars */
+        }
+        .video-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px; /* Gap between video boxes */
+            padding: 20px;
+            white-space: nowrap;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            position: relative;
+            justify-content: flex-start; /* Align to the start */
+        }
+        .video-container::-webkit-scrollbar {
+            display: none;
+        }
+        .video-box {
+            flex: 0 0 auto;
+            width: 320px;
+            height: 180px;
+            border-radius: 5px;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+        .video-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .video-box:hover img {
+            transform: scale(1.05);
+        }
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            z-index: 10;
+        }
+        .play-button svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+            opacity: 0.9;
+        }
+        .video-box:hover .play-button {
+            background: rgba(255, 0, 0, 0.8);
+        }
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 50%;
+            transition: 0.3s;
+            z-index: 20;
+        }
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+        .left-button {
+            left: 10px;
+        }
+        .right-button {
+            right: 10px;
         }
     </style>
 </head>
 <body>
 
+    <!-- Profile Section -->
     <div class="container">
         <img src="gunnu.jpeg" alt="Dhairya Mittal" class="profile-pic">
         <h1>Dhairya Mittal</h1>
@@ -76,6 +166,95 @@
         <a href="https://youtube.com/@gunnu_xd?si=jf06eQftzwNRxx6a" class="button" target="_blank">▶️ YouTube</a>
         <a href="mailto:gunnumittal358@gmail.com" class="button">📧 Contact Me</a>
     </div>
+
+    <!-- YouTube Swiper -->
+    <h2>Latest Videos</h2>
+    <div class="video-wrapper">
+        <button class="nav-button left-button" onclick="scrollVideos(-1)">&#9665;</button>
+        <div class="video-container" id="videos"></div>
+        <button class="nav-button right-button" onclick="scrollVideos(1)">&#9655;</button>
+    </div>
+
+    <script>
+        const CHANNEL_ID = 'UCH-K7XVFJLyEBWEF6nyTDNA';
+        const RSS_FEED_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
+
+        async function fetchYouTubeVideos() {
+            try {
+                const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(RSS_FEED_URL)}`);
+                const data = await response.json();
+                const videosDiv = document.getElementById('videos');
+
+                data.items.slice(0, 10).forEach(video => {
+                    const videoId = video.link.split("v=")[1];
+                    const videoBox = document.createElement('div');
+                    videoBox.className = 'video-box';
+                    videoBox.onclick = () => window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+
+                    const thumbnail = document.createElement('img');
+                    thumbnail.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                    thumbnail.alt = video.title;
+
+                    const playButton = document.createElement('div');
+                    playButton.className = 'play-button';
+                    playButton.innerHTML = `
+                        <svg viewBox="0 0 68 48">
+                            <path class="ytp-large-play-button-bg" fill="red" d="M66.52,7.68A8.37,8.37,0,0,0,60.62,2.1C55.4,1.12,34,1.12,34,1.12S12.6,1.12,7.38,2.1A8.37,8.37,0,0,0,1.48,7.68,87.6,87.6,0,0,0,0,24s0,16.32,1.48,16.32a8.37,8.37,0,0,0,5.9,5.58c5.22,1,26.62,1,26.62,1s21.4,0,26.62-1a8.37,8.37,0,0,0,5.9-5.58C68,40.32,68,24,68,24S68,7.68,66.52,7.68Z"></path>
+                            <path fill="#fff" d="M45,24,27,14V34Z"></path>
+                        </svg>
+                    `;
+
+                    videoBox.appendChild(thumbnail);
+                    videoBox.appendChild(playButton);
+                    videosDiv.appendChild(videoBox);
+                });
+            } catch (error) {
+                console.error('Error fetching YouTube videos:', error);
+            }
+        }
+
+        function scrollVideos(direction) {
+            const videoContainer = document.getElementById('videos');
+            const videoBoxWidth = document.querySelector('.video-box').offsetWidth; // Get the width of a video box
+            const gap = 15; // The gap between video boxes (as defined in CSS)
+            const totalWidth = videoBoxWidth + gap; // Total width of one video box including gap
+
+            // Calculate the new scroll position
+            const currentScroll = videoContainer.scrollLeft;
+            const newScroll = currentScroll + (direction * totalWidth);
+
+            // Scroll to the new position
+            videoContainer.scrollTo({
+                left: newScroll,
+                behavior: 'smooth'
+            });
+
+            // Center the nearest video box after scrolling
+            setTimeout(() => {
+                centerVideoBox();
+            }, 300); // Adjust timeout as needed
+        }
+
+        function centerVideoBox() {
+            const videoContainer = document.getElementById('videos');
+            const videoBoxes = document.querySelectorAll('.video-box');
+            const containerWidth = videoContainer.clientWidth;
+            const videoBoxWidth = videoBoxes[0].offsetWidth + 15; // Width of a video box plus gap
+
+            // Calculate the index of the video box to center
+            const scrollLeft = videoContainer.scrollLeft;
+            const index = Math.round((scrollLeft + (containerWidth / 2) - (videoBoxWidth / 2)) / videoBoxWidth);
+            const newScrollLeft = index * videoBoxWidth;
+
+            // Scroll to the new position
+            videoContainer.scrollTo({
+                left: newScrollLeft,
+                behavior: 'smooth'
+            });
+        }
+
+        fetchYouTubeVideos();
+    </script>
 
 </body>
 </html>
